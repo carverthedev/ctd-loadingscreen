@@ -24,22 +24,25 @@ end
 
 -- Send config to NUI via SendNUIMessage (works during loading screen;
 -- postNui/fetch from NUI back to client does NOT work at this stage).
+-- We send at multiple intervals because the NUI frame may not be ready
+-- on the first attempt and SendNUIMessage fires-and-forgets silently.
 Citizen.CreateThread(function()
-    Citizen.Wait(500) -- give the NUI frame time to initialize
+    local config = {
+        title          = LOADINGSCREEN_CONFIG.title,
+        subtitle       = LOADINGSCREEN_CONFIG.subtitle,
+        displayMs      = LOADINGSCREEN_CONFIG.displayMs,
+        transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
+        musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,
+        images         = getBackgroundImages(),
+        imagesFromServer = {},
+        musicFromServer  = {},
+    }
 
-    SendNUIMessage({
-        type   = 'loadConfig',
-        config = {
-            title          = LOADINGSCREEN_CONFIG.title,
-            subtitle       = LOADINGSCREEN_CONFIG.subtitle,
-            displayMs      = LOADINGSCREEN_CONFIG.displayMs,
-            transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
-            musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,
-            images         = getBackgroundImages(),
-            imagesFromServer = {},
-            musicFromServer  = {},
-        }
-    })
+    local delays = { 500, 1500, 3000 }
+    for _, delay in ipairs(delays) do
+        Citizen.Wait(delay)
+        SendNUIMessage({ type = 'loadConfig', config = config })
+    end
 end)
 
 -- NUI requests shutdown when loading reaches 100% (fetch works at this stage)

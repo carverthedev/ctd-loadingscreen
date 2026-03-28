@@ -22,6 +22,7 @@ let isMuted = false;
 let displayMs = 6000;
 let transitionMs = 1200;
 let shutdownSent = false;
+let configApplied = false;
 
 
 // NUI Helpers
@@ -204,7 +205,8 @@ function applyConfig(config) {
 window.addEventListener('message', (event) => {
   const data = event.data || {};
 
-  if (data.type === 'loadConfig' && data.config) {
+  if (data.type === 'loadConfig' && data.config && !configApplied) {
+    configApplied = true;
     // Preserve local mute preference over whatever the server sends
     const savedMuted = localStorage.getItem('ctd_loadingscreen_muted');
     data.config.musicMuted = savedMuted === 'true';
