@@ -9,16 +9,16 @@ files {
     'files/web/index.html',
     'files/web/style.css',
     'files/web/script.js',
+    'config.json',
     'assets/*',
     'assets/background/*'
 }
 
-shared_script 'config.lua'
 server_script 'files/server.lua'
 client_script 'files/client.lua'
 
 escrow_ignore {
-    'config.lua',
+    'config.json',
     'assets/*',
     'assets/background/*'
 }

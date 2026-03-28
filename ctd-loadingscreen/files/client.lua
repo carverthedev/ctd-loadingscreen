@@ -13,7 +13,6 @@ local function getBackgroundImages()
         if filePath and filePath:match('^assets/background/') then
             local ext = filePath:match('%.(%w+)$')
             if ext and IMAGE_EXTS[ext:lower()] then
-                -- Resolve relative to NUI at files/web/
                 table.insert(images, '../../' .. filePath)
             end
         end
@@ -22,26 +21,17 @@ local function getBackgroundImages()
     return images
 end
 
--- Send config to NUI via SendNUIMessage (works during loading screen;
--- postNui/fetch from NUI back to client does NOT work at this stage).
--- We send at multiple intervals because the NUI frame may not be ready
--- on the first attempt and SendNUIMessage fires-and-forgets silently.
+-- Send background images to NUI. Display config (title, subtitle, etc.) is
+-- fetched directly from config.json by the NUI — no timing dependency.
+-- We still retry a few times in case the NUI frame isn't ready yet.
 Citizen.CreateThread(function()
-    local config = {
-        title          = LOADINGSCREEN_CONFIG.title,
-        subtitle       = LOADINGSCREEN_CONFIG.subtitle,
-        displayMs      = LOADINGSCREEN_CONFIG.displayMs,
-        transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
-        musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,
-        images         = getBackgroundImages(),
-        imagesFromServer = {},
-        musicFromServer  = {},
-    }
+    local images = getBackgroundImages()
+    if #images == 0 then return end -- NUI will use the default fallback image
 
     local delays = { 500, 1500, 3000 }
     for _, delay in ipairs(delays) do
         Citizen.Wait(delay)
-        SendNUIMessage({ type = 'loadConfig', config = config })
+        SendNUIMessage({ type = 'loadImages', images = images })
     end
 end)
 
