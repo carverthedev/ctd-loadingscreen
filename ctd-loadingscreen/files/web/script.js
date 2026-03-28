@@ -21,6 +21,7 @@ let trackIndex = 0;
 let isMuted = false;
 let displayMs = 6000;
 let transitionMs = 1200;
+let shutdownSent = false;
 
 
 // NUI Helpers
@@ -116,10 +117,14 @@ function updateProgress(percent, text) {
   if (fill) fill.style.width = `${pct}%`;
   if (status) status.textContent = text || (pct >= 99 ? 'Almost done...' : `Loading... ${Math.floor(pct)}%`);
   
-  if (pct >= 100) {
-    setTimeout(() => {
-      // Manual shutdown (no persistence payload)
-      postNui('shutdown', {});
+  if (pct >= 100 && !shutdownSent) {
+    shutdownSent = true;
+    setTimeout(function tryShutdown() {
+      postNui('shutdown', {}).catch(() => {
+        // NUI callback not ready yet — retry in 1s
+        shutdownSent = false;
+        setTimeout(tryShutdown, 1000);
+      });
     }, 2000);
   }
 }
