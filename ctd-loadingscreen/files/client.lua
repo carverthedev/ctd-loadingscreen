@@ -22,22 +22,28 @@ local function getBackgroundImages()
     return images
 end
 
--- NUI requests full config on load (title, images, music, timings)
-RegisterNUICallback('getConfig', function(data, cb)
-    cb({
-        title          = LOADINGSCREEN_CONFIG.title,
-        subtitle       = LOADINGSCREEN_CONFIG.subtitle,
-        mode           = LOADINGSCREEN_CONFIG.mode,
-        displayMs      = LOADINGSCREEN_CONFIG.displayMs,
-        transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
-        musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,
-        images         = getBackgroundImages(),
-        imagesFromServer = {},
-        musicFromServer  = {},
+-- Send config to NUI via SendNUIMessage (works during loading screen;
+-- postNui/fetch from NUI back to client does NOT work at this stage).
+Citizen.CreateThread(function()
+    Citizen.Wait(500) -- give the NUI frame time to initialize
+
+    SendNUIMessage({
+        type   = 'loadConfig',
+        config = {
+            title          = LOADINGSCREEN_CONFIG.title,
+            subtitle       = LOADINGSCREEN_CONFIG.subtitle,
+            mode           = LOADINGSCREEN_CONFIG.mode,
+            displayMs      = LOADINGSCREEN_CONFIG.displayMs,
+            transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
+            musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,
+            images         = getBackgroundImages(),
+            imagesFromServer = {},
+            musicFromServer  = {},
+        }
     })
 end)
 
--- NUI requests shutdown when loading reaches 100%
+-- NUI requests shutdown when loading reaches 100% (fetch works at this stage)
 RegisterNUICallback('shutdown', function(data, cb)
     ShutdownLoadingScreenNui()
     cb({})

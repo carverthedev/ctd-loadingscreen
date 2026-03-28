@@ -198,8 +198,13 @@ function applyConfig(config) {
 // Event Listeners
 window.addEventListener('message', (event) => {
   const data = event.data || {};
-  
-  if (typeof data.loadFraction === 'number') {
+
+  if (data.type === 'loadConfig' && data.config) {
+    // Preserve local mute preference over whatever the server sends
+    const savedMuted = localStorage.getItem('ctd_loadingscreen_muted');
+    data.config.musicMuted = savedMuted === 'true';
+    applyConfig(data.config);
+  } else if (typeof data.loadFraction === 'number') {
     updateProgress(data.loadFraction * 100, data.status || data.text || data.loadName);
   } else if (typeof data.progress === 'number') {
     updateProgress(data.progress, data.status || data.text);
@@ -216,17 +221,6 @@ window.addEventListener('load', () => {
   const savedMuted = localStorage.getItem('ctd_loadingscreen_muted');
   const initialMuted = savedMuted === 'true';
 
-  // Apply immediate defaults so the screen isn't blank while waiting for config
+  // Apply immediate defaults — real config arrives via SendNUIMessage from client.lua
   applyConfig({ musicMuted: initialMuted, musicVolume: 0.08 });
-
-  // Fetch real config (title, backgrounds, music) from the client script
-  postNui('getConfig', {})
-    .then(r => r.json())
-    .then(cfg => {
-      cfg.musicMuted = initialMuted; // preserve local mute preference
-      applyConfig(cfg);
-    })
-    .catch(() => {
-      // Client script unavailable — defaults already applied above
-    });
 });
