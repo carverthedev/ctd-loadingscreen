@@ -1,0 +1,4 @@
+-- CTD Loading Screen - Server Script
+-- No active server-side logic is required for this resource.
+-- Configuration and asset paths are embedded in the NUI (script.js) for
+-- loading screen compatibility.
