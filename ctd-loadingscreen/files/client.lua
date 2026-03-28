@@ -32,7 +32,6 @@ Citizen.CreateThread(function()
         config = {
             title          = LOADINGSCREEN_CONFIG.title,
             subtitle       = LOADINGSCREEN_CONFIG.subtitle,
-            mode           = LOADINGSCREEN_CONFIG.mode,
             displayMs      = LOADINGSCREEN_CONFIG.displayMs,
             transitionMs   = LOADINGSCREEN_CONFIG.transitionMs,
             musicVolume    = LOADINGSCREEN_CONFIG.musicVolume,

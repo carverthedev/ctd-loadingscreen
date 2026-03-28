@@ -1,6 +1,4 @@
 LOADINGSCREEN_CONFIG = {
-    mode = "single", -- "single" or "slideshow"
-
     title = "CHANGE ME",
     subtitle = "Welcome to the server!",
 
